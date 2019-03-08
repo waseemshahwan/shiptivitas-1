@@ -5,6 +5,7 @@ import Swimlane from './Swimlane';
 import './Board.css';
 
 export default class Board extends React.Component {
+
   constructor(props) {
     super(props);
     const clients = this.getClients();
@@ -15,12 +16,14 @@ export default class Board extends React.Component {
         complete: clients.filter(client => client.status && client.status === 'complete'),
       }
     }
+
     this.swimlanes = {
       backlog: React.createRef(),
       inProgress: React.createRef(),
       complete: React.createRef(),
     }
   }
+
   getClients() {
     return [
       ['1','Stark, White and Abbott','Cloned Optimal Architecture', 'in-progress'],
@@ -50,10 +53,41 @@ export default class Board extends React.Component {
       status: companyDetails[3],
     }));
   }
+
   renderSwimlane(name, clients, ref) {
     return (
       <Swimlane name={name} clients={clients} dragulaRef={ref}/>
     );
+  }
+
+  initDrag() {
+
+    let containers = Object.values(this.swimlanes).map(i => i.current);
+    this.drake = Dragula(containers);
+
+    this.drake.on('drop', (elem, target) => {
+
+      let targetStatus = target.previousSibling.innerText;
+      switch(targetStatus) {
+        case 'Backlog':
+          elem.className = 'Card Card-grey';
+          break;
+        case 'In Progress':
+          elem.className = 'Card Card-blue';
+        break;
+        case 'Complete':
+          elem.className = 'Card Card-green';
+          break;
+      }
+
+    });
+
+  }
+
+  componentDidMount() {
+
+    this.initDrag();
+
   }
 
   render() {
